@@ -15,6 +15,11 @@ export class AuthController {
         return this.authService.singUp(authCredentialsDto);
     }
 
+    @Post('/signin')
+    async singIn(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<{accessToken: string}> {
+        return this.authService.singIn(authCredentialsDto);
+    }
+
     @Delete('/:id')
     async delete(@Param('id', ParseIntPipe) id: number): Promise<Response>  {
         return this.authService.delete(id);
