@@ -6,6 +6,7 @@ import {Task} from "./task.entity";
 import {DeleteResult} from "typeorm";
 import {TaskStatus} from "./task-status.enum";
 import {GetTasksFilterDto} from "./dto/get-tasks-filter.dto";
+import {User} from "../auth/user.entity";
 
 @Injectable()
 export class TasksService {
@@ -39,8 +40,11 @@ export class TasksService {
         return task;
     }
 
-    async create(createTaskDto: CreateTaskDto): Promise<Task> {
-        return this.taskRepository.createTask(createTaskDto);
+    async create(
+        createTaskDto: CreateTaskDto,
+        user: User
+    ): Promise<Task> {
+        return this.taskRepository.createTask(createTaskDto, user);
     }
 
     async delete(id: number): Promise<void> {
