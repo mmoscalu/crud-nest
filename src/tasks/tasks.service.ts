@@ -7,6 +7,7 @@ import {DeleteResult} from "typeorm";
 import {TaskStatus} from "./task-status.enum";
 import {GetTasksFilterDto} from "./dto/get-tasks-filter.dto";
 import {User} from "../auth/user.entity";
+import {GetUser} from "../auth/get-user.decorator";
 
 @Injectable()
 export class TasksService {
@@ -17,13 +18,19 @@ export class TasksService {
     ) {
     }
 
-    async list(filterDto: GetTasksFilterDto): Promise<Task[]> {
-        return this.taskRepository.list(filterDto);
+    async list(
+        filterDto: GetTasksFilterDto,
+        user: User
+    ): Promise<Task[]> {
+        return this.taskRepository.list(filterDto, user);
     }
 
 
-    async getById(id: number): Promise<Task> {
-        const task: Task = await this.taskRepository.findOne(id);
+    async getById(
+        id: number,
+        user: User
+    ): Promise<Task> {
+        const task: Task = await this.taskRepository.findOne({where: {id, userId: user.id}});
 
         if (!task) {
             throw new NotFoundException(`Task with ID "${id}" not found`);
@@ -33,8 +40,12 @@ export class TasksService {
     }
 
 
-    async updateTaskStatus(id: number, status: TaskStatus): Promise<Task> {
-        const task: Task = await this.getById(id);
+    async updateTaskStatus(
+        id: number,
+        status: TaskStatus,
+        user: User
+    ): Promise<Task> {
+        const task: Task = await this.getById(id, user);
         task.status = status;
         await task.save();
         return task;
@@ -47,8 +58,11 @@ export class TasksService {
         return this.taskRepository.createTask(createTaskDto, user);
     }
 
-    async delete(id: number): Promise<void> {
-        const result: DeleteResult = await this.taskRepository.delete(id);
+    async delete(
+        id: number,
+        user: User
+    ): Promise<void> {
+        const result: DeleteResult = await this.taskRepository.delete({id, userId: user.id});
         if (result.affected === 0) {
             throw new NotFoundException(`Task with ID "${id}" not found`);
         }
